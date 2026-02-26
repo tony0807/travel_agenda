@@ -55,6 +55,24 @@ div[data-testid="stDecoration"],
     display: none !important;
     visibility: hidden !important;
 }
+/* 必杀技：根除所有移动端/官方自带的附加上下文锚点与链接 */
+a[href*="share.streamlit.io"], 
+a[href*="github.com"], 
+a[href*="streamlit.io/cloud"],
+a[title="Manage app"],
+a[title="Deploy"],
+button[title="Manage app"],
+button[title="Deploy"],
+.stDeployButton,
+div[data-testid="stAppDeployButton"],
+img[src*="github"],
+svg[title="GitHub"] {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
 /* 拦截所有以 iframe 形式注入的云端悬浮窗 */
 iframe[src*="badges"],
 iframe[title="streamlitApp"] {
@@ -831,7 +849,7 @@ if prompt_text:
     anim_box.markdown("""
     <div style="width: 100%; overflow: hidden; font-size: 32px; white-space: nowrap; margin-top: 15px;">
         <div style="display: inline-block; animation: run 5s linear infinite;">
-            <div style="display: inline-block; transform: scaleX(-1);">🏃‍♂️</div> 🧳
+            🧳 <div style="display: inline-block; transform: scaleX(-1);">🏃‍♂️</div>
         </div>
     </div>
     <style>
