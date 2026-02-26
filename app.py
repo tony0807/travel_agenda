@@ -5,7 +5,9 @@ from openai import OpenAI
 import threading
 import time
 import random
-from ddgs import DDGS
+import urllib.request
+import urllib.parse
+import re
 
 # --- 页面配置 ---
 st.set_page_config(
@@ -726,14 +728,21 @@ if prompt_text:
             try:
                 # 构造特定的站内检索词
                 search_query = f"{prompt_text} 旅游 攻略 (site:mafengwo.cn OR site:qyer.com OR site:xiaohongshu.com OR site:tripadvisor.com)"
-                with DDGS() as ddgs:
-                    # 抓取排名前 6 的相关搜索摘要
-                    results = list(ddgs.text(search_query, max_results=6))
                 
-                if results:
+                # 纯原生、无依赖安全搜索方案，兼容所有云部署环境
+                url = "https://html.duckduckgo.com/html/?q=" + urllib.parse.quote(search_query)
+                req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Android 14)'})
+                html_resp = urllib.request.urlopen(req, timeout=6).read().decode('utf-8', errors='ignore')
+                
+                # 用原生正则优雅提取搜索摘要
+                snippets = re.findall(r'<a class="result__snippet[^>]*>(.*?)</a>', html_resp, flags=re.IGNORECASE|re.DOTALL)
+                
+                if snippets:
                     search_context = "\\n\\n【系统附加最新网络参考资讯】\\n以下是来自全网各大旅游平台（小红书/马蜂窝/穷游/TripAdvisor）最新的攻略与旅行建议，请在排版行程以及撰写 desc 时参考这些真实、时效性强的内容，使其更有干货和借鉴意义：\\n"
-                    for r in results:
-                        search_context += f"- 标题：{r.get('title')}\\n  摘要：{r.get('body')}\\n"
+                    # 取前6条清洗后的纯净文本
+                    for snip in snippets[:6]:
+                        clean_text = re.sub(r'<[^>]+>', '', snip).strip()
+                        search_context += f"- 参考摘要：{clean_text}\\n"
             except Exception as e:
                 # 如果因为网络问题抓取失败，静默通过，直接依靠大模型原本的知识生成
                 pass
