@@ -549,12 +549,39 @@ def generate_html_template(json_data):
     return html
 
 # --- 主界面 ---
-st.title("✈️ 你的旅程，我来安排")
-st.markdown("*读万卷书，行万里路 · 愿每一段旅途，皆成值得珍藏的诗章*")
-
-# 优化底部 chat_input 样式，使其更宽广大气
+# 使用自定义 HTML 替换原有 st.title 以实现精确的手机端响应式排版
 st.markdown("""
 <style>
+.main-intro-box {
+    text-align: left;
+    margin-bottom: 30px;
+}
+.main-intro-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: #1a1a1a;
+}
+.main-intro-subtitle {
+    font-size: 1.15rem;
+    color: #666;
+    font-style: italic;
+    opacity: 0.9;
+}
+
+/* 手机端：标题和副标题变小 */
+@media (max-width: 600px) {
+    .main-intro-box {
+        margin-bottom: 15px;
+    }
+    .main-intro-title {
+        font-size: 1.6rem;
+    }
+    .main-intro-subtitle {
+        font-size: 0.85rem;
+    }
+}
+
 /* chat 输入框容器 */
 [data-testid="stChatInput"] {
     padding-bottom: 20px;
@@ -563,24 +590,48 @@ st.markdown("""
 [data-testid="stChatInput"] textarea {
     min-height: 72px !important;
     max-height: 110px !important;
-    line-height: 1.7 !important;
-    padding: 20px 24px !important; 
+    line-height: 1.6 !important;
+    padding: 22px 24px !important; 
     font-size: 16px !important;
     overflow-y: auto !important;
     border-radius: 12px !important;
 }
-/* 发送按钮稍微往下一点对齐居中 */
+/* 发送按钮稍微往下一点对齐中间 */
 [data-testid="stChatInput"] button {
-    height: auto !important;
-    padding-top: 10px !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 /* 确保占位文字不被截断，且带有呼吸感 */
 [data-testid="stChatInput"] textarea::placeholder {
-    line-height: 1.8;
+    line-height: 1.6;
     white-space: pre-wrap;
     opacity: 0.6;
 }
+
+/* ===== 手机端：修复 chat_input 对齐与字体大小 ===== */
+@media (max-width: 600px) {
+    [data-testid="stChatInput"] textarea {
+        min-height: 54px !important;
+        padding: 14px 16px !important; /* 缩小上下边距，使光标水平居中 */
+        font-size: 14.5px !important;
+        line-height: 1.4 !important;
+    }
+    [data-testid="stChatInput"] button {
+        padding-top: 0 !important;
+        align-self: center !important;
+    }
+    [data-testid="stChatInput"] {
+        padding-bottom: 10px;
+    }
+}
 </style>
+
+<div class="main-intro-box">
+    <div class="main-intro-title">✈️ 你的旅程，我来安排</div>
+    <div class="main-intro-subtitle">读万卷书，行万里路 · 愿每一段旅途，皆成值得珍藏的诗章</div>
+</div>
 """, unsafe_allow_html=True)
 
 # 聊天输入框 - 官方原生吸底输入框
