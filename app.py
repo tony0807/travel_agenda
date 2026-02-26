@@ -44,14 +44,9 @@ div[data-testid="stDecoration"],
 /* 强行屏蔽 Streamlit Cloud 右下角悬浮的 Github 头像/Manage App/Viewer Badge 控件 */
 .viewerBadge_container__1JCIV,
 .viewerBadge_link__1S137,
-[class^="viewerBadge_"],
-[class*="st-emotion-cache-"] > div:last-child > a, 
-a[href^="https://streamlit.io/cloud"],
-.stApp > div:last-child {
+.viewerBadge_container__KVmBv,
+[class^="viewerBadge_"] {
     display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
 }
 </style>
 """, unsafe_allow_html=True)
