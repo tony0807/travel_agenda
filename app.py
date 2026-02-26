@@ -66,7 +66,7 @@ def generate_html_template(json_data):
     for i, day in enumerate(days_data):
         date_label = day.get("date", f"Day {i+1}")
         city_label = day.get("city", "")
-        nav_buttons_html += f"""<a onclick="document.getElementById('day-{i}').scrollIntoView({{behavior:'smooth', block:'start'}}); return false;" class="nav-pill" href="#">{date_label}<span class="nav-city">{city_label}</span></a>"""
+        nav_buttons_html += f"""<a onclick="document.getElementById('day-{i}').scrollIntoView({{behavior:'smooth', block:'start'}}); return false;" class="nav-pill" href="javascript:void(0)">{date_label}<span class="nav-city">{city_label}</span></a>"""
 
     # 亮点 HTML
     highlights_html = ""
@@ -327,8 +327,8 @@ def generate_html_template(json_data):
 
         <!-- 顶部固定快捷导航栏 -->
         <div class="sticky-topnav">
-            <a class="nav-pill" onclick="openModal('section-overview'); return false;" href="#">总览<span class="nav-city">Overview</span></a>
-            <a class="nav-pill" onclick="openModal('section-highlights'); return false;" href="#">亮点<span class="nav-city">Highlights</span></a>
+            <a class="nav-pill" onclick="openModal('section-overview'); return false;" href="javascript:void(0)">总览<span class="nav-city">Overview</span></a>
+            <a class="nav-pill" onclick="openModal('section-highlights'); return false;" href="javascript:void(0)">亮点<span class="nav-city">Highlights</span></a>
             <div class="nav-divider"></div>
             {nav_buttons_html}
         </div>
