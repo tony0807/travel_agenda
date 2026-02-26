@@ -772,16 +772,16 @@ if prompt_text:
 
     # 主线程展示动态旅行趣知识提示与诗意状态
     status_box = st.empty()
-    anim_box = st.empty()
     tip_box = st.empty()
+    anim_box = st.empty()  # 移至最后，使动画渲染在小知识下方
     
-    # 注入加载状态中的奔跑小马动画 (只渲染一次以免闪烁)
+    # 注入加载状态中的奔跑旅人动画 (无闪烁，节奏放缓)
     anim_box.markdown("""
-    <div style="width: 100%; overflow: hidden; font-size: 35px; white-space: nowrap; margin: -5px 0 10px 0;">
-        <div style="display: inline-block; animation: gallop 2.5s linear infinite;">🐎 💨</div>
+    <div style="width: 100%; overflow: hidden; font-size: 32px; white-space: nowrap; margin-top: 15px;">
+        <div style="display: inline-block; animation: run 5s linear infinite;">🏃‍♂️ 🧳</div>
     </div>
     <style>
-    @keyframes gallop {
+    @keyframes run {
         0% { transform: translateX(-50px); }
         100% { transform: translateX(100vw); }
     }
@@ -802,8 +802,8 @@ if prompt_text:
 
     api_thread.join()
     status_box.empty()
-    anim_box.empty()
     tip_box.empty()
+    anim_box.empty()
 
     if "error" in result_store:
         st.error(f"发生错误: {result_store['error']}")
