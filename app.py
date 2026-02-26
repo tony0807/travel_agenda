@@ -663,26 +663,27 @@ if prompt_text:
         try:
             client = OpenAI(api_key=api_key, base_url=base_url)
             system_prompt = """
-你是一个旅行规划 API。请严格只输出 JSON 数据，不要包含 ```json 或其他 markdown 标记。
+你的主要受众是中国游客。行程表的所有可视文本必须优先使用优美的中文，如果名字有知名的外语，请放在中文后面的括号里。
+请严格只输出 JSON 数据，不要包含 ```json 或其他 markdown 标记。
 输出结构：
 {
-  "trip_title": "主标题(英文，简短有格调)",
-  "trip_subtitle": "副标题(英文)",
+  "trip_title": "主标题(优先中文大气格调，外文放括号。如：京都秘境寻幽 (Kyoto Exploration) )",
+  "trip_subtitle": "副标题(中文，诗意或生动的副标题)",
   "overview": "行程总览，用2-3句话介绍这趟旅行的整体安排和亮点(中文)",
   "highlights": ["亮点1", "亮点2", "亮点3", "亮点4", "亮点5"],
   "days": [
     {
       "date": "Day 1",
-      "city": "城市名",
+      "city": "城市名(中文)",
       "activities": [
-        { "time": "10:00", "name": "景点名", "desc": "丰富生动的介绍和游玩建议，不少于50字(中文)", "lat": 0.0, "lng": 0.0, "img_keyword": "必须使用景点全称英文+所在城市名，如 Eiffel Tower Paris" }
+        { "time": "10:00", "name": "景点名(优先中文，外语可放括号)", "desc": "丰富生动的介绍和游玩建议，不少于50字(中文)", "lat": 0.0, "lng": 0.0, "img_keyword": "必须使用景点全称英文+所在城市名，如 Eiffel Tower Paris" }
       ]
     }
   ]
 }
 注意：
-1. overview 必须用中文，生动简洁
-2. cover_search 必须是英文，精准描述目的地风景，如 Kyoto Japan autumn maple red leaves
+1. 所有的对外展示标题(trip_title, trip_subtitle)与活动标题(name)优先采用中文。
+2. 保持给后端抓图用的 cover_search 和 img_keyword 为精准的英文。
 3. highlights 至少5条，每条10字以内，中文
 4. img_keyword 必须精准，景点英文全称+城市名，用于Wikipedia搜图
 5. desc 要生动俏皮，可以加网络用语，不要死板，不少于60字
@@ -770,32 +771,39 @@ if prompt_text:
         components.html(html_code, height=800, scrolling=True)
         
         # 行程生成展示成功后，注入强效 CSS
-        # 1. 废弃外层的所有滚动条，彻底根治滑动错乱
-        # 2. 隐藏首屏大标题、输入框、空白内外边距
-        # 3. 将包含详细行程的 iframe 直接撑满 100% 屏幕高度
+        # 1. 废除外层的所有包裹干扰，屏蔽底座黑框
+        # 2. 将包含详细行程的 iframe 直接拔出，强制全局 fixed 定位铺满屏幕
         st.markdown("""
         <style>
-        /* 隐藏底部原输入框 */
-        [data-testid="stChatInput"] { display: none !important; }
-        
-        /* 彻底切断最外层 Streamlit 全屏框架的滚动能力，将控制权独家移交给 iframe */
-        [data-testid="stAppViewContainer"] > section > div > div {
+        /* 隐藏底部输入框及其巨大的黑色底座（彻底根绝底部黑块）*/
+        [data-testid="stChatInput"],
+        [data-testid="stBottomBlockContainer"],
+        div.stBottom { 
+            display: none !important; 
+            visibility: hidden !important;
+            height: 0 !important;
             padding: 0 !important;
-            max-width: 100% !important;
+            margin: 0 !important;
         }
+        
+        /* 彻底切断最外层 Streamlit 全屏框架的滚动能力 */
         .main { overflow: hidden !important; height: 100vh !important; }
         
-        /* 隐藏不再需要的标题和提示信息，给行程地图让路 */
-        .main-intro-box { display: none !important; }
-        div[data-testid="stAlert"] { display: none !important; }
-        
-        /* iframe 全面接管全视口屏幕尺寸，不再带有圆角和间距，沉浸感拉满 */
+        /* 强行独立化我们的行程单组件，完全接管屏幕，遮蔽所有原生 Streamlit 外壳元素 */
+        div[data-testid="stHtml"] iframe,
+        div.stHtml iframe,
         iframe {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
             height: 100vh !important;
             width: 100vw !important;
             border-radius: 0 !important;
             border: none !important;
             margin: 0 !important;
+            padding: 0 !important;
+            z-index: 99999 !important;
+            background-color: #f0ebe3 !important; /* 同步底层米色，杜绝任何黑白边 */
         }
         </style>
         """, unsafe_allow_html=True)
