@@ -72,6 +72,49 @@ div[style*="position: fixed"][style*="bottom:"][style*="right:"] {
 </style>
 """, unsafe_allow_html=True)
 
+# 动态反制 Streamlit Cloud 的跨域 iframe 父级徽章 (解决移动端去不掉 Github 图标的问题)
+components.html(
+    """
+    <script>
+    function forceRemoveCloudBadges() {
+        try {
+            const parentDoc = window.parent.document;
+            if (parentDoc) {
+                // 植入针对 Streamlit Cloud 顶层宿主的隐藏样式
+                const styles = `
+                    .viewerBadge_container__1JCIV, .viewerBadge_link__1S137, 
+                    [class^="viewerBadge_"], [class*="viewerBadge"],
+                    .stDeployButton, [data-testid="stAppDeployButton"] {
+                        display: none !important;
+                        visibility: hidden !important;
+                        opacity: 0 !important;
+                        pointer-events: none !important;
+                    }
+                    /* 最新版部分流式容器右下角固定框 */
+                    div[style*="position: fixed"][style*="bottom"] {
+                        display: none !important;
+                    }
+                `;
+                let styleNode = parentDoc.getElementById('kill-streamlit-badges');
+                if (!styleNode) {
+                    styleNode = parentDoc.createElement('style');
+                    styleNode.id = 'kill-streamlit-badges';
+                    styleNode.innerHTML = styles;
+                    parentDoc.head.appendChild(styleNode);
+                }
+            }
+        } catch (e) {
+            console.log("Cross-origin frame protections prevented badge removal.");
+        }
+    }
+    // 不断轮询确保其刚生成就被强行干掉
+    setInterval(forceRemoveCloudBadges, 800);
+    forceRemoveCloudBadges();
+    </script>
+    """,
+    height=0, width=0,
+)
+
 
 # --- API 配置 ---
 api_key = "sk-060b0e0759944181920f42d90aa3012a"
@@ -787,7 +830,9 @@ if prompt_text:
     # 注入加载状态中的奔跑旅人动画 (无闪烁，节奏放缓)
     anim_box.markdown("""
     <div style="width: 100%; overflow: hidden; font-size: 32px; white-space: nowrap; margin-top: 15px;">
-        <div style="display: inline-block; animation: run 5s linear infinite;">🧳 🏃‍♂️ 💨</div>
+        <div style="display: inline-block; animation: run 5s linear infinite;">
+            <div style="display: inline-block; transform: scaleX(-1);">🏃‍♂️</div> 🧳
+        </div>
     </div>
     <style>
     @keyframes run {
