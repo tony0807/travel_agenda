@@ -33,9 +33,25 @@ iframe {
 header[data-testid="stHeader"] {
     display: none !important;
 }
-/* 隐藏右下角的 footer 'Manage App' 占位 */
-footer[data-testid="stFooter"] {
+/* 彻底隐藏右下角的 footer 'Manage App' 占位及其它官方残余 */
+footer[data-testid="stFooter"],
+div[data-testid="stDecoration"],
+[data-testid="stStatusWidget"],
+#MainMenu {
     display: none !important;
+}
+
+/* 强行屏蔽 Streamlit Cloud 右下角悬浮的 Github 头像/Manage App/Viewer Badge 控件 */
+.viewerBadge_container__1JCIV,
+.viewerBadge_link__1S137,
+[class^="viewerBadge_"],
+[class*="st-emotion-cache-"] > div:last-child > a, 
+a[href^="https://streamlit.io/cloud"],
+.stApp > div:last-child {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 </style>
 """, unsafe_allow_html=True)
