@@ -746,12 +746,36 @@ if prompt_text:
         st.success("✨ 生成成功！您可以在下方直接编辑文字，点击右下角按钮保存为 PDF。")
         total_days = len(json_data.get("days", []))
         total_acts = sum(len(d.get("activities", [])) for d in json_data.get("days", []))
-        # 只要给一个基础 height 让内部能生出滚动条（CSS已经用了 85vh !important 进行覆盖） 
+        # 只要给一个基础 height 让内部能生出滚动条（CSS已经通过 100vh 进行覆盖接管全屏高度） 
         components.html(html_code, height=800, scrolling=True)
         
-        # 行程生成展示成功后，注入 CSS 手动隐藏不再需要的输入框以节约大量空间
+        # 行程生成展示成功后，注入强效 CSS
+        # 1. 废弃外层的所有滚动条，彻底根治滑动错乱
+        # 2. 隐藏首屏大标题、输入框、空白内外边距
+        # 3. 将包含详细行程的 iframe 直接撑满 100% 屏幕高度
         st.markdown("""
         <style>
+        /* 隐藏底部原输入框 */
         [data-testid="stChatInput"] { display: none !important; }
+        
+        /* 彻底切断最外层 Streamlit 全屏框架的滚动能力，将控制权独家移交给 iframe */
+        [data-testid="stAppViewContainer"] > section > div > div {
+            padding: 0 !important;
+            max-width: 100% !important;
+        }
+        .main { overflow: hidden !important; height: 100vh !important; }
+        
+        /* 隐藏不再需要的标题和提示信息，给行程地图让路 */
+        .main-intro-box { display: none !important; }
+        div[data-testid="stAlert"] { display: none !important; }
+        
+        /* iframe 全面接管全视口屏幕尺寸，不再带有圆角和间距，沉浸感拉满 */
+        iframe {
+            height: 100vh !important;
+            width: 100vw !important;
+            border-radius: 0 !important;
+            border: none !important;
+            margin: 0 !important;
+        }
         </style>
         """, unsafe_allow_html=True)
