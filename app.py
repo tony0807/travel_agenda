@@ -37,24 +37,35 @@ header[data-testid="stHeader"] {
 footer[data-testid="stFooter"],
 div[data-testid="stDecoration"],
 [data-testid="stStatusWidget"],
+[data-testid="stToolbar"],
+[data-testid="stAppDeployButton"],
 #MainMenu {
     display: none !important;
+    visibility: hidden !important;
 }
 
-/* 强行屏蔽 Streamlit Cloud 内部使用强注入样式与 iframe 生成的底层徽章（如 Git 和纸船） */
+/* 强歼 Streamlit Cloud 内部使用强注入样式与 iframe 生成的底层徽章（Git/纸船图标） */
 .viewerBadge_container__1JCIV,
 .viewerBadge_link__1S137,
 .viewerBadge_container__KVmBv,
 [class^="viewerBadge_"],
 [class*="viewerBadge"] {
     display: none !important;
-}
-iframe[src*="badges"] {
-    display: none !important;
     visibility: hidden !important;
 }
-.stAppDeployButton, .stDeployButton, [data-testid="stAppDeployButton"] {
+/* 拦截所有以 iframe 形式注入的云端悬浮窗 */
+iframe[src*="badges"],
+iframe[title="streamlitApp"] {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+/* 新版 Streamlit 在移动端底部右侧强行生成的绝对定位悬浮框 */
+div[style*="position: fixed"][style*="bottom:"][style*="right:"] {
+    display: none !important;
+    pointer-events: none !important;
+    z-index: -9999 !important;
 }
 </style>
 """, unsafe_allow_html=True)
