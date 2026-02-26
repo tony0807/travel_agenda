@@ -5,6 +5,7 @@ from openai import OpenAI
 import threading
 import time
 import random
+from ddgs import DDGS
 
 # --- 页面配置 ---
 st.set_page_config(
@@ -687,11 +688,30 @@ if prompt_text:
 5. desc 要生动俏皮，可以加网络用语，不要死板，不少于60字
 6. lat/lng 坐标必须准确
 """
+            # 在向大模型发送请求前，先去全网检索最新的优质攻略（如马蜂窝，穷游，小红书，Tripadvisor）
+            search_context = ""
+            try:
+                # 构造特定的站内检索词
+                search_query = f"{prompt_text} 旅游 攻略 (site:mafengwo.cn OR site:qyer.com OR site:xiaohongshu.com OR site:tripadvisor.com)"
+                with DDGS() as ddgs:
+                    # 抓取排名前 6 的相关搜索摘要
+                    results = list(ddgs.text(search_query, max_results=6))
+                
+                if results:
+                    search_context = "\\n\\n【系统附加最新网络参考资讯】\\n以下是来自全网各大旅游平台（小红书/马蜂窝/穷游/TripAdvisor）最新的攻略与旅行建议，请在排版行程以及撰写 desc 时参考这些真实、时效性强的内容，使其更有干货和借鉴意义：\\n"
+                    for r in results:
+                        search_context += f"- 标题：{r.get('title')}\\n  摘要：{r.get('body')}\\n"
+            except Exception as e:
+                # 如果因为网络问题抓取失败，静默通过，直接依靠大模型原本的知识生成
+                pass
+
+            user_msg = prompt_text + search_context
+
             response = client.chat.completions.create(
                 model=model_name,
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": prompt_text}
+                    {"role": "user", "content": user_msg}
                 ],
                 temperature=0.7
             )
