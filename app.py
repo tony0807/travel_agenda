@@ -137,7 +137,7 @@ components.html(
 # --- API 配置 ---
 api_key = "sk-060b0e0759944181920f42d90aa3012a"
 base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-model_name = "qwen3.5-27b"
+model_name = "deepseek-v3.2"
 
 
 

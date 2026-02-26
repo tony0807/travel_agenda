@@ -13,7 +13,7 @@
 ### **后端与驱动层 (Backend & Core Logic)**
 
 - **Web 框架**: `Streamlit` - 用于快速搭建 Python 互动式应用面板，并在云端容器内快速部署。
-- **大语言模型 (LLM)**: `Qwen 3.5-27B` (阿里云百炼 DashScope) - 承载所有文本理解、旅游常识问答和严格标准的 JSON 数据树结构化输出。
+- **大语言模型 (LLM)**: `DeepSeek V3.2` (阿里云百炼 DashScope) - 承载所有文本理解、旅游常识问答和严格标准的 JSON 数据树结构化输出。
 - **原生爬虫 (Crawler)**: `urllib.request` + `re` (正则表达式)
   - **架构亮点**：完全摒弃了可能在 Streamlit Cloud 轻量级容器中引发编译错误的第三方库（例如 `ddgs`），依靠纯内置模块动态拦截 DuckDuckGo 流量并爬取诸如“马蜂窝”、“穷游”、“小红书”、“Tripadvisor” 的有机搜索列表前六位的实时攻略，注入至 Prompt 中以确保 LLM 生成的时效性。
 - **图片 API**: `Wikipedia Action API` (核心) / `Bing Thumbnail API` (兜底)
@@ -44,7 +44,7 @@
    - 触发多线程 `threading.Thread` 的 `call_api()` 方法避免主线程（UI UI刷新）阻塞。
    - 同时主线程挂起循环展示诸如 `🧳 🏃‍♂️ 💨` 行李箱旅人的 CSS 过渡动画与循环旅行小知识 (Travel Tips) 及诗意加载短句，大幅提高用户的加载期望爽感。
 3. **Prompt 与爬虫合并**：
-   `Final_User_Prompt = User_input + Scraped_Newest_Tips(马蜂窝/小红书...)` -> 提交至 `qwen3.5-27b` 模型。
+   `Final_User_Prompt = User_input + Scraped_Newest_Tips(马蜂窝/小红书...)` -> 提交至 `deepseek-v3.2` 模型。
 4. **HTML 模板倒模与呈现**：
    模型吐出 JSON -> `generate_html_template()` 进行拼装 -> 调用大尺寸 `iframe` 显示 -> 自动注入“隐身 CSS” 将外层 Streamlit 自带输入框和所有边框强行干掉（呈现出独占首屏的干净页面）。
 
