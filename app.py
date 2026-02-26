@@ -41,11 +41,19 @@ div[data-testid="stDecoration"],
     display: none !important;
 }
 
-/* 强行屏蔽 Streamlit Cloud 右下角悬浮的 Github 头像/Manage App/Viewer Badge 控件 */
+/* 强行屏蔽 Streamlit Cloud 内部使用强注入样式与 iframe 生成的底层徽章（如 Git 和纸船） */
 .viewerBadge_container__1JCIV,
 .viewerBadge_link__1S137,
 .viewerBadge_container__KVmBv,
-[class^="viewerBadge_"] {
+[class^="viewerBadge_"],
+[class*="viewerBadge"] {
+    display: none !important;
+}
+iframe[src*="badges"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+.stAppDeployButton, .stDeployButton, [data-testid="stAppDeployButton"] {
     display: none !important;
 }
 </style>
@@ -107,6 +115,9 @@ def generate_html_template(json_data):
         <link href="https://fonts.googleapis.com/css2?family=Italiana&family=Cinzel:wght@700&family=Noto+Serif+SC:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <!-- Leaflet Fullscreen Plugin -->
+        <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js'></script>
+        <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css' rel='stylesheet' />
         <style>
             :root {{
                 --bg-color: #f0ebe3;
@@ -469,6 +480,7 @@ def generate_html_template(json_data):
 
                         var map = L.map(pt.id, {{
                             zoomControl: true, scrollWheelZoom: false, attributionControl: false,
+                            fullscreenControl: true,
                             layers: [defaultLayer]
                         }}).setView([lat, lng], 14);
                         
@@ -749,7 +761,21 @@ if prompt_text:
 
     # 主线程展示动态旅行趣知识提示与诗意状态
     status_box = st.empty()
+    anim_box = st.empty()
     tip_box = st.empty()
+    
+    # 注入加载状态中的奔跑小马动画 (只渲染一次以免闪烁)
+    anim_box.markdown("""
+    <div style="width: 100%; overflow: hidden; font-size: 35px; white-space: nowrap; margin: -5px 0 10px 0;">
+        <div style="display: inline-block; animation: gallop 2.5s linear infinite;">🐎 💨</div>
+    </div>
+    <style>
+    @keyframes gallop {
+        0% { transform: translateX(-50px); }
+        100% { transform: translateX(100vw); }
+    }
+    </style>
+    """, unsafe_allow_html=True)
     
     # 每次生成随机抽取一句诗意状态，保持在整个 generation 过程中不变
     current_status = random.choice(POETIC_STATUSES)
@@ -765,6 +791,7 @@ if prompt_text:
 
     api_thread.join()
     status_box.empty()
+    anim_box.empty()
     tip_box.empty()
 
     if "error" in result_store:
