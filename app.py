@@ -778,7 +778,7 @@ if prompt_text:
     # 注入加载状态中的奔跑旅人动画 (无闪烁，节奏放缓)
     anim_box.markdown("""
     <div style="width: 100%; overflow: hidden; font-size: 32px; white-space: nowrap; margin-top: 15px;">
-        <div style="display: inline-block; animation: run 5s linear infinite;">🏃‍♂️ 🧳</div>
+        <div style="display: inline-block; animation: run 5s linear infinite;">🧳 🏃‍♂️ 💨</div>
     </div>
     <style>
     @keyframes run {
