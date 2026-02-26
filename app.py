@@ -8,7 +8,7 @@ import random
 
 # --- 页面配置 ---
 st.set_page_config(
-    page_title="Wanderlust AI · 智能旅行规划",
+    page_title="旅程，旅行行程规划专家",
     layout="wide",
     page_icon="✈️",
     initial_sidebar_state="collapsed"
@@ -27,6 +27,14 @@ iframe {
 .block-container {
     padding-top: 2rem;
     padding-bottom: 5rem;
+}
+/* 隐藏右上角的 Streamlit 作者/Deploy 按钮及顶部留白 */
+header[data-testid="stHeader"] {
+    display: none !important;
+}
+/* 隐藏右下角的 footer 'Manage App' 占位 */
+footer[data-testid="stFooter"] {
+    display: none !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -56,9 +64,8 @@ def generate_html_template(json_data):
 
     # 封面图：用 AI 返回的 cover_search 关键词 + 标题哈希种子，确保同一行程始终用同一张图
     cover_search = data.get("cover_search", trip_title).replace(" ", "+")
-    # 放弃随机性极强但现在已被废弃且疯狂缓存的 Unsplash Source API
-    # 改用更专业的免费图库：如果可能的话，后续推荐使用 Pixabay API 或 Pexels，这里为了前端纯动态拉取，使用带关键字的直接图片地址代理
-    cover_url = f"https://wsrv.nl/?url=https://images.unsplash.com/photo-1488646953014-85cb44e25828&w=1080&h=1600&fit=cover" # Fallback placeholder
+    # 封面图关键词：利用 Bing Thumbnail 接口作为绝对备用抓取源，彻底弃用 Unsplash
+    cover_url = f"https://tse1.mm.bing.net/th?q={cover_search}+travel+scenery&w=1080&h=1600&c=7&rs=1&p=0"
 
 
     # 生成日期快捷跳转按钮 HTML
@@ -99,7 +106,7 @@ def generate_html_template(json_data):
                 --border-soft: rgba(74, 59, 42, 0.12);
             }}
             * {{ box-sizing: border-box; }}
-            body {{ margin: 0; font-family: 'Noto Serif SC', serif; background-color: var(--bg-color); color: var(--primary-dark); overflow-x: hidden; }}
+            body {{ margin: 0; font-family: 'Noto Serif SC', serif; background-color: var(--bg-color); color: var(--primary-dark); overflow-x: clip; }}
             
             /* ===== 海报区域 ===== */
             .header-container {{ position: relative; width: 100%; height: 50vh; min-height: 350px; overflow: hidden; background: #1a1a1a; }}
@@ -199,31 +206,30 @@ def generate_html_template(json_data):
             .card:hover {{ transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.1); }}
             .location-name {{ font-size: 17px; font-weight: bold; margin-bottom: 6px; display: inline-block; padding-right: 30px; }}
             
-            /* 删除按钮 (大卡片层级) - 更加显眼 */
+            /* 删除按钮 (大卡片层级) - 轻量优雅 */
             .delete-btn {{
-                position: absolute; top: 12px; right: 12px; z-index: 600;
-                padding: 6px 12px; border-radius: 12px;
-                background: rgba(255, 235, 235, 0.9); border: 1px solid #ffccc7;
-                color: #f5222d; font-size: 12px; font-weight: 600;
-                display: flex; align-items: center; justify-content: center; gap: 4px;
-                cursor: pointer; transition: all 0.2s; text-decoration: none;
-                box-shadow: 0 2px 6px rgba(245,34,45,0.15);
+                position: absolute; top: 10px; right: 10px; z-index: 600;
+                width: 26px; height: 26px; border-radius: 50%;
+                background: rgba(0,0,0,0.04); border: none;
+                color: #999; font-size: 14px;
+                display: flex; align-items: center; justify-content: center;
+                cursor: pointer; transition: all 0.2s ease; text-decoration: none;
             }}
-            .delete-btn:hover {{ background: #ff4d4f; color: #fff; border-color: #ff4d4f; box-shadow: 0 4px 12px rgba(245,34,45,0.3); }}
+            .delete-btn:hover {{ background: #ff4d4f; color: #fff; transform: scale(1.1); }}
             
             /* 删除局部媒体 (地图/图片) */
             .remove-media-btn {{
                 position: absolute; top: 8px; right: 8px; z-index: 600;
-                width: 20px; height: 20px; border-radius: 50%;
+                width: 22px; height: 22px; border-radius: 50%;
                 background: rgba(0,0,0,0.5); border: none;
-                color: #fff; font-size: 10px; font-weight: bold;
+                color: #fff; font-size: 10px; font-weight: normal;
                 display: flex; align-items: center; justify-content: center;
-                cursor: pointer; transition: background 0.2s;
+                cursor: pointer; transition: background 0.2s; backdrop-filter: blur(2px);
             }}
             .remove-media-btn:hover {{ background: #ff4d4f; }}
             
             /* 地图 */
-            .map-section {{ height: 160px; width: 100%; position: relative; z-index: 1; }}
+            .map-section {{ height: 160px; width: 100%; position: relative; z-index: 1; border-bottom: 2px solid var(--border-soft); }}
             .nav-to-btn-group {{ position: absolute; bottom: 10px; right: 10px; z-index: 500; display: flex; gap: 6px; }}
             .nav-btn {{
                 background: rgba(255,255,255,0.9); color: #333; border: 1px solid #ddd;
@@ -310,14 +316,14 @@ def generate_html_template(json_data):
                 .top-btn {{ bottom: 16px; left: 12px; padding: 10px 13px; font-size: 16px; }}
             }}
 
-            html {{ scroll-behavior: smooth; }}
+            html {{ scroll-behavior: smooth; scroll-padding-top: 65px; }}
         </style>
     </head>
     <body>
         <!-- 海报区 -->
         <div class="header-container">
-            <!-- 动态加载封面：摒弃 Unsplash, 这里用 JS 异步通过 Wiki 抓取 -->
-            <img id="main-cover-img" src="" class="header-poster" onload="this.classList.add('loaded')" onerror="this.src='https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1080&h=1600&fit=crop'; this.classList.add('loaded');">
+            <!-- 动态加载封面：摒弃 Unsplash, 这里用 JS 异步通过 Wiki/Bing 抓取 -->
+            <img id="main-cover-img" src="" class="header-poster" onload="this.classList.add('loaded')" onerror="this.src='https://tse1.mm.bing.net/th?q={trip_title}+travel&w=1080&h=1600&c=7&rs=1&p=0'; this.classList.add('loaded');">
             <div class="poster-overlay"></div>
             <div class="header-title-box">
                 <h1 class="main-title" contenteditable="true">{trip_title}</h1>
@@ -375,7 +381,7 @@ def generate_html_template(json_data):
             # Wikipedia 图片 ID（程序详见 JS 部分动态加载）
             wiki_query = act.get("img_keyword", name)
             photo_id = f"photo-{map_id}"
-            fallback_url = "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&h=400&fit=crop"
+            fallback_url = f"https://tse1.mm.bing.net/th?q={wiki_query}+travel&w=600&h=400&c=7&rs=1&p=0"
             
             # 导航链接
             nav_google = f"https://www.google.com/maps/search/?api=1&query={lat},{lng}"
@@ -388,7 +394,7 @@ def generate_html_template(json_data):
                 <span class="time-label" contenteditable="true">{time}</span>
                 <span class="location-name" contenteditable="true">{name}</span>
                 <div class="card">
-                    <button class="delete-btn" title="删除此行程" onclick="this.closest('.timeline-item').remove()">🗑️ 删除</button>
+                    <button class="delete-btn" title="删除此行程" onclick="this.closest('.timeline-item').remove()">✖</button>
                     <div class="map-section" id="{map_id}">
                         <button class="remove-media-btn" title="删除地图" onclick="this.parentElement.remove()">✖</button>
                         <div class="nav-to-btn-group">
@@ -419,9 +425,9 @@ def generate_html_template(json_data):
             
             document.addEventListener("DOMContentLoaded", function () {{
                 
-                // --- 1. 动态加载首页大图 (使用 Wikipedia API 或备用 API) ---
+                // --- 1. 动态加载首页大图 (使用 Wikipedia API 或备用 Bing API) ---
                 var coverImgEl = document.getElementById('main-cover-img');
-                var genericFallback = 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1080&h=1600&fit=crop';
+                var genericFallback = 'https://tse1.mm.bing.net/th?q=' + encodeURIComponent(coverSearchQuery + " travel scenery") + '&w=1080&h=1600&c=7&rs=1&p=0';
                 fetch('https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(coverSearchQuery.split(' ')[0]) + '&prop=pageimages&format=json&pithumbsize=1600&origin=*')
                     .then(r => r.json())
                     .then(d => {{
@@ -430,32 +436,35 @@ def generate_html_template(json_data):
                         if (page && page.thumbnail) {{
                             coverImgEl.src = page.thumbnail.source;
                         }} else {{
-                            // 如果 Wiki 没找到，使用基于关键字生成随机数确保固定的强力占位服务 (避免Unsplash Source 的完全废弃缓存)
-                            coverImgEl.src = 'https://picsum.photos/seed/' + encodeURIComponent(coverSearchQuery) + '/1080/1600';
+                            // 如果 Wiki 没找到，使用 Bing 缩略图接口 (绝对彻底弃用 Unsplash)
+                            coverImgEl.src = genericFallback;
                         }}
                     }}).catch(() => {{ coverImgEl.src = genericFallback; }});
 
 
                 // --- 2. 加载行程地图与景点图片 ---
                 mapPoints.forEach(pt => {{
-                        var cartoLayer = L.tileLayer('https://{{s}}.basemaps.cartocdn.com/rastertiles/voyager/{{z}}/{{x}}/{{y}}{{r}}.png', {{ maxZoom: 19 }});
+                        // Google Map 全球层源 (更稳定更丰富)
+                        var googleLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={{x}}&y={{y}}&z={{z}}', {{ maxZoom: 19 }});
                         // 高德地图 HTTPS 兼容版：使用 wprd 子域名，确保能够正常加载显示
                         var amapLayer = L.tileLayer('https://wprd01.is.autonavi.com/appmaptile?x={{x}}&y={{y}}&z={{z}}&lang=zh_cn&size=1&scl=1&style=7', {{ maxZoom: 19 }});
 
-                        // 智能判断：如果经纬度落在中国大致范围内，则默认选中高德地图，否则默认国际地图
-                        var isChina = (pt.lat > 18.0 && pt.lat < 53.5 && pt.lng > 73.0 && pt.lng < 135.0);
-                        var defaultLayer = isChina ? amapLayer : cartoLayer;
+                        // 智能判断：将经纬度转为浮点数并判定中国大致范围
+                        var lat = parseFloat(pt.lat);
+                        var lng = parseFloat(pt.lng);
+                        var isChina = (lat > 18.0 && lat < 54.0 && lng > 73.0 && lng < 135.0);
+                        var defaultLayer = isChina ? amapLayer : googleLayer;
 
                         var map = L.map(pt.id, {{
                             zoomControl: false, scrollWheelZoom: false, attributionControl: false,
                             layers: [defaultLayer]
-                        }}).setView([pt.lat, pt.lng], 12);
+                        }}).setView([lat, lng], 14);
                         
                         // 图层控制菜单
                         if (isChina) {{
-                            L.control.layers({{"高德地图(默认)": amapLayer, "国际地图": cartoLayer}}, null, {{position: 'topleft'}}).addTo(map);
+                            L.control.layers({{"🗺️ 高德地图(默认)": amapLayer, "🌍 Google地图": googleLayer}}, null, {{position: 'topleft'}}).addTo(map);
                         }} else {{
-                            L.control.layers({{"国际地图(默认)": cartoLayer, "高德地图": amapLayer}}, null, {{position: 'topleft'}}).addTo(map);
+                            L.control.layers({{"🌍 Google地图(海外默认)": googleLayer, "🗺️ 高德地图": amapLayer}}, null, {{position: 'topleft'}}).addTo(map);
                         }}
                         
                         L.control.scale({{ position: 'bottomleft', metric: true, imperial: false }}).addTo(map);
@@ -463,7 +472,7 @@ def generate_html_template(json_data):
                         // Wikipedia API 动态加载景点真实图片
                         (function(photoId, wikiQuery) {{
                             var imgEl = document.getElementById(photoId);
-                            var fallback = 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&h=400&fit=crop';
+                            var fallback = 'https://tse1.mm.bing.net/th?q=' + encodeURIComponent(wikiQuery + " landmark") + '&w=600&h=400&c=7&rs=1&p=0';
                             fetch('https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(wikiQuery) + '&prop=pageimages&format=json&pithumbsize=800&origin=*')
                                 .then(function(r) {{ return r.json(); }})
                                 .then(function(d) {{
@@ -472,8 +481,8 @@ def generate_html_template(json_data):
                                     if (page && page.thumbnail) {{
                                         imgEl.src = page.thumbnail.source;
                                     }} else {{
-                                        // fallback: Unsplash 搜索
-                                        imgEl.src = 'https://source.unsplash.com/600x400/?' + encodeURIComponent(wikiQuery) + '&sig=' + Math.abs(wikiQuery.split('').reduce(function(a,c){{return a+c.charCodeAt(0)}}, 0));
+                                        // fallback: 运用 Bing 图片缩略图服务，彻底摆脱 Unsplash
+                                        imgEl.src = fallback;
                                     }}
                                 }}).catch(function() {{ imgEl.src = fallback; }});
                         }})(pt.photo_id, pt.wiki_query);
@@ -505,20 +514,26 @@ def generate_html_template(json_data):
                                         .bindPopup('<small>' + p.display_name.split(',')[0] + '</small>');
                                 }}
                             }});
-                        }}).catch(()=>{{}});
-                    }}
-                }});
-            // 控制弹窗
+                        }}).catch(function(){{}});
+                }}); // 结束 mapPoints.forEach
+            }}); // 结束 DOMContentLoaded
+
+            // ======================================
+            // 控制全局弹窗 (必须在全局作用域申明，方可供 HTML onclick 调用)
+            // ======================================
             function openModal(targetId) {{
                 var modal = document.getElementById('info-modal');
+                if(!modal) return;
                 modal.classList.add('show');
                 setTimeout(function() {{
                     var target = document.getElementById(targetId);
                     if(target) target.scrollIntoView({{behavior: 'smooth', block: 'start'}});
                 }}, 100);
             }}
+            
             function closeModal() {{
-                document.getElementById('info-modal').classList.remove('show');
+                var modal = document.getElementById('info-modal');
+                if(modal) modal.classList.remove('show');
             }}
 
             // 监听键盘 ESC 关闭弹窗
@@ -682,3 +697,10 @@ if prompt_text:
         total_acts = sum(len(d.get("activities", [])) for d in json_data.get("days", []))
         # 只要给一个基础 height 让内部能生出滚动条（CSS已经用了 85vh !important 进行覆盖） 
         components.html(html_code, height=800, scrolling=True)
+        
+        # 行程生成展示成功后，注入 CSS 手动隐藏不再需要的输入框以节约大量空间
+        st.markdown("""
+        <style>
+        [data-testid="stChatInput"] { display: none !important; }
+        </style>
+        """, unsafe_allow_html=True)
