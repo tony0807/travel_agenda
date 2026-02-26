@@ -457,7 +457,7 @@ def generate_html_template(json_data):
                         var defaultLayer = isChina ? amapLayer : googleLayer;
 
                         var map = L.map(pt.id, {{
-                            zoomControl: false, scrollWheelZoom: false, attributionControl: false,
+                            zoomControl: true, scrollWheelZoom: false, attributionControl: false,
                             layers: [defaultLayer]
                         }}).setView([lat, lng], 14);
                         
