@@ -561,13 +561,11 @@ st.markdown("""
     font-size: 2.5rem;
     font-weight: 800;
     margin-bottom: 8px;
-    color: #1a1a1a;
 }
 .main-intro-subtitle {
     font-size: 1.15rem;
-    color: #666;
     font-style: italic;
-    opacity: 0.9;
+    opacity: 0.7;
 }
 
 /* 手机端：标题和副标题变小 */
